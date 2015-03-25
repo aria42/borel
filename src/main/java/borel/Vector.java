@@ -1,6 +1,7 @@
 package borel;
 
 import lombok.Data;
+import lombok.val;
 
 import java.util.Spliterator;
 import java.util.function.Consumer;
@@ -15,52 +16,102 @@ public interface Vector {
    *
    * @return dimension of the space for the vector
    */
-  public long dimension();
+  long dimension();
 
-  public double at(long dimensionIdx);
+  /**
+   *
+   * @param dimensionIdx
+   * @return value at `dimensionIdx`
+   */
+  double at(long dimensionIdx);
 
-  public void set(long dimensionIdx, double val);
+  /**
+   * Set value at `dimensionIdx`
+   * @param dimensionIdx
+   * @param val
+   */
+  void set(long dimensionIdx, double val);
 
-  public long numStoredEntries();
+  /**
+   * @return How many entries are stored explicitly in the Vector
+   */
+  long numStoredEntries();
 
-  public Vector copy();
+  /**
+   * @return a copy of the vector you can freely mutate
+   */
+  Vector copy();
 
-  default public double[] at(long...dimensionIndices) {
-    double[] result = new double[dimensionIndices.length];
+  /**
+   * @param dimensionIndices
+   * @return A slice of the Vector at the specified `dimensionIndices`. The lenght of the slice
+   * is the same as `dimensionIndices`.
+   */
+  default double[] at(long...dimensionIndices) {
+    val result = new double[dimensionIndices.length];
     for (int i = 0; i < result.length; i++) {
       result[i] = at(dimensionIndices[i]);
     }
     return result;
   }
 
-  default public void mapInPlace(EntryUpdateFunction updateFn) {
+  /**
+   * Mutate the Vector-in-place according to `updateFn`
+   * @param updateFn
+   */
+  default void mapInPlace(EntryUpdateFunction updateFn) {
     nonZeroEntries().forEachOrdered(entry -> {
       double updatedValue = updateFn.update(entry.index, entry.value);
       set(entry.index, updatedValue);
     });
   }
 
-  default public Vector map(EntryUpdateFunction updateFn) {
+  /**
+   *
+   * @param updateFn
+   * @return Copy of the Vector with each entry having `updateFn` applied
+   */
+  default Vector map(EntryUpdateFunction updateFn) {
     Vector result = copy();
     result.mapInPlace(updateFn);
     return result;
   }
 
-  default public void affineUpdateInPlace(double scale, double offset) {
+  /**
+   * In place update of `scale  * x_i + offset` for each element.
+   * @param scale
+   * @param offset
+   */
+  default void affineUpdateInPlace(double scale, double offset) {
     this.mapInPlace((idx, value) -> scale * value + offset);
   }
 
-  default public Vector affine(double scale, double offset) {
+  /**
+   * Like [`affineUpdateInPlace`] but
+   * @param scale
+   * @param offset
+   * @return
+   */
+  default Vector affine(double scale, double offset) {
     Vector result = copy();
     result.affineUpdateInPlace(scale, offset);
     return result;
   }
 
-  default public Vector scale(double scale) {
+  /**
+   * @param scale
+   * @return Copy of the vector scaled by `scale`
+   */
+  default Vector scale(double scale) {
     return affine(scale, 0.0);
   }
 
-  default public double dotProduct(Vector other) {
+  /**
+   * Compute the [dot-product](http://en.wikipedia.org/wiki/Dot_product) with `other` vector
+   * @param other
+   * @return
+   */
+  default double dotProduct(Vector other) {
     if (other.dimension() != this.dimension()) {
       throw new IllegalArgumentException("Dimensions don't match");
     }
@@ -73,21 +124,21 @@ public interface Vector {
         .sum();
   }
 
-  default public double l2NormSquared() {
+  default double l2NormSquared() {
     return this.dotProduct(this);
   }
 
-  default public Stream<Entry> entries() {
-    VectorSpliterator spliterator = new VectorSpliterator(this, 0, dimension());
+  default Stream<Entry> entries() {
+    val spliterator = new VectorSpliterator(this, 0, dimension());
     return StreamSupport.stream(spliterator, true);
   }
 
-  default public Stream<Entry> nonZeroEntries() {
+  default Stream<Entry> nonZeroEntries() {
     return entries().filter(e -> e.value != 0.0);
   }
 
   @Data(staticConstructor = "of")
-  public final static class Entry implements Comparable<Entry> {
+  final class Entry implements Comparable<Entry> {
     public final long index;
     public final double value;
 
@@ -97,7 +148,7 @@ public interface Vector {
     }
   }
 
-  final static class VectorSpliterator implements Spliterator<Entry> {
+  final class VectorSpliterator implements Spliterator<Entry> {
     private Vector vec;
     private long position;
     private long stop;
@@ -141,8 +192,7 @@ public interface Vector {
   }
 
   @FunctionalInterface
-  public interface EntryUpdateFunction {
-    public double update(long dimensionIdx, double value);
+  interface EntryUpdateFunction {
+    double update(long dimensionIdx, double value);
   }
-
 }

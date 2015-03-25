@@ -3,6 +3,7 @@ apply plugin: 'idea'
 
 repositories {
   mavenCentral()
+  jcenter()
 }
 
 test {
@@ -19,6 +20,8 @@ dependencies {
   compile 'org.projectlombok:lombok:1.14.8'
 
   testCompile 'org.testng:testng:6.8.1'
+  testCompile 'org.openjdk.jmh:jmh-core:0.9'
+  testCompile 'org.openjdk.jmh:jmh-generator-annprocess:0.9'
 
   markdownDoclet 'ch.raffael.pegdown-doclet:pegdown-doclet:1.1.1'
 }

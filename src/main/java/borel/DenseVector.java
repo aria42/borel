@@ -1,16 +1,23 @@
 package borel;
 
+import lombok.val;
+
 import java.util.Arrays;
 
 public class DenseVector implements Vector {
   private final double[] elems;
 
-  public DenseVector(double[] elems) {
+  private DenseVector(double[] elems) {
     this.elems = elems;
   }
 
-  public DenseVector(int numDimensions) {
-    this(new double[numDimensions]);
+  public static DenseVector of(int numDimensions) {
+    return new DenseVector(new double[numDimensions]);
+  }
+
+  public static DenseVector of(double[] elems) {
+    double[] copy = Arrays.copyOf(elems, elems.length);
+    return new DenseVector(copy);
   }
 
   @Override
@@ -27,7 +34,7 @@ public class DenseVector implements Vector {
   @Override
   public double at(long dimensionIdx) {
     if (dimensionIdx >= dimension()) {
-      String errMsg = String.format("Illegal index %d > dimension %d",dimensionIdx,dimension());
+      val errMsg = String.format("Illegal index %d > dimension %d",dimensionIdx,dimension());
       throw new IllegalArgumentException(errMsg);
     }
     ensureIndexIsInteger(dimensionIdx);

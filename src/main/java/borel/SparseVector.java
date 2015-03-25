@@ -3,6 +3,7 @@ package borel;
 import gnu.trove.iterator.TLongDoubleIterator;
 import gnu.trove.map.TLongDoubleMap;
 import gnu.trove.map.hash.TLongDoubleHashMap;
+import lombok.val;
 
 import java.util.Spliterator;
 import java.util.stream.LongStream;
@@ -14,7 +15,6 @@ public class SparseVector implements Vector {
   private final long dimension;
 
   private SparseVector(TLongDoubleMap vec, long dimension) {
-
     this.vec = vec;
     this.dimension = dimension;
   }
@@ -25,7 +25,7 @@ public class SparseVector implements Vector {
 
   public static SparseVector fromEntries(Stream<Vector.Entry> entries, long dimension) {
     boolean isSized = entries.spliterator().hasCharacteristics(Spliterator.SIZED);
-    TLongDoubleMap vec = isSized  ?
+    val vec = isSized  ?
         new TLongDoubleHashMap((int)entries.spliterator().estimateSize()) :
         new TLongDoubleHashMap();
     entries.forEach(e -> vec.put(e.index, e.value));
@@ -34,6 +34,10 @@ public class SparseVector implements Vector {
 
   public static SparseVector make(long dimension) {
     return new SparseVector(new TLongDoubleHashMap(), dimension);
+  }
+
+  public static SparseVector make(TLongDoubleMap vec, long dimension) {
+    return new SparseVector(new TLongDoubleHashMap(vec), dimension);
   }
 
   public static SparseVector make() {
