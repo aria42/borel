@@ -3,12 +3,14 @@ package borel;
 import gnu.trove.iterator.TLongDoubleIterator;
 import gnu.trove.map.TLongDoubleMap;
 import gnu.trove.map.hash.TLongDoubleHashMap;
+import lombok.EqualsAndHashCode;
 import lombok.val;
 
 import java.util.Spliterator;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+@EqualsAndHashCode()
 public class SparseVector implements Vector {
 
   private final TLongDoubleMap vec;

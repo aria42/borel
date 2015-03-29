@@ -1,9 +1,11 @@
 package borel;
 
+import lombok.EqualsAndHashCode;
 import lombok.val;
 
 import java.util.Arrays;
 
+@EqualsAndHashCode()
 public class DenseVector implements Vector {
   private final double[] elems;
 
@@ -11,11 +13,11 @@ public class DenseVector implements Vector {
     this.elems = elems;
   }
 
-  public static DenseVector of(int numDimensions) {
-    return new DenseVector(new double[numDimensions]);
+  public static DenseVector of(long numDimensions) {
+    return new DenseVector(new double[(int)numDimensions]);
   }
 
-  public static DenseVector of(double[] elems) {
+  public static DenseVector of(double... elems) {
     double[] copy = Arrays.copyOf(elems, elems.length);
     return new DenseVector(copy);
   }

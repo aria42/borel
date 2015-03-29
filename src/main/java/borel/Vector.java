@@ -43,6 +43,15 @@ public interface Vector {
   Vector copy();
 
   /**
+   * Vectors should implement `equals`. The semantics require the classes to be the same
+   * __and__ that the values identical. In other words, a dense and sparse vector with same content
+   * do not count as `equals`.
+   */
+  boolean equals(Object o);
+
+  int hashCode();
+
+  /**
    * @param dimensionIndices
    * @return A slice of the Vector at the specified `dimensionIndices`. The lenght of the slice
    * is the same as `dimensionIndices`.
@@ -60,7 +69,7 @@ public interface Vector {
    * @param updateFn
    */
   default void mapInPlace(EntryUpdateFunction updateFn) {
-    nonZeroEntries().forEachOrdered(entry -> {
+    entries().forEachOrdered(entry -> {
       double updatedValue = updateFn.update(entry.index, entry.value);
       set(entry.index, updatedValue);
     });
@@ -128,6 +137,16 @@ public interface Vector {
     return this.dotProduct(this);
   }
 
+  default double l2Distance(Vector other) {
+    return this.add(-1.0, other).l2NormSquared();
+  }
+
+  default double inc(long idx, double amount) {
+    double newValue = at(idx) + amount;
+    set(idx, newValue);
+    return newValue;
+  }
+
   default Stream<Entry> entries() {
     val spliterator = new VectorSpliterator(this, 0, dimension());
     return StreamSupport.stream(spliterator, true);
@@ -135,6 +154,27 @@ public interface Vector {
 
   default Stream<Entry> nonZeroEntries() {
     return entries().filter(e -> e.value != 0.0);
+  }
+
+  default Vector add(double scale, Vector dir) {
+    Vector result = this.copy();
+    result.addInPlace(scale, dir);
+    return result;
+  }
+
+  default void addInPlace(double scale, Vector dir) {
+    dir.nonZeroEntries().forEach((Entry e) ->
+      this.inc(e.getIndex(), scale * e.getValue()));
+  }
+
+  default Vector add(Vector dir) {
+    return add(1.0, dir);
+  }
+
+  default void scaleInPlace(double v) {
+    this.nonZeroEntries().forEach(e -> {
+      this.set(e.getIndex(), v * e.getValue());
+    });
   }
 
   @Data(staticConstructor = "of")
