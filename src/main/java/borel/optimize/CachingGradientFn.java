@@ -15,7 +15,7 @@ public class CachingGradientFn implements GradientFn {
   private final LinkedList<HistoryEntry> history;
 
   @Data
-  class HistoryEntry {
+  public class HistoryEntry {
     final Vector input;
     final double output;
     final Vector grad;

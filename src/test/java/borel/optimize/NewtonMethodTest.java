@@ -10,6 +10,15 @@ import static org.testng.Assert.*;
 public class NewtonMethodTest {
   public void testGradientDescent() throws Exception {
     val minimizer = new NewtonMethod(__ -> QuasiNewton.gradientDescent());
+    testQuartic(minimizer);
+  }
+
+  public void testLBFGS() throws Exception {
+    testQuartic(new NewtonMethod(__ -> QuasiNewton.lbfgs(1)));
+    testQuartic(new NewtonMethod(__ -> QuasiNewton.lbfgs(3)));
+  }
+
+  private void testQuartic(NewtonMethod minimizer) {
     // Simple Function
     val res = minimizer.minimize(GradientFn.from(1, TestUtils.xSquared), DenseVector.of(1.0));
     assertEquals(res.xmin, DenseVector.of(0.0));
